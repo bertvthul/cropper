@@ -1,6 +1,6 @@
-# Simple upload and crop your images
+# Simple upload and crop images for Laravel
 
-A simple uploader for your images in Laravel. Simply add the following to your blade file; 
+A simple uploader for your images in Laravel. No database columns needed, due to saving the images using the field name, the id and using the model name as the folder to save in.  
 
 ```html
 @cropper(['avatar', 'App\User', ['class' => 'form-control', 'id' => $user->id]])
@@ -25,6 +25,17 @@ class User
         ],
     ];
 ```
+
+Images are saved using the logic;
+```
+public
+	images
+		user (model name)
+			1-avatar.jpg (id-fieldname)
+			1-avatar-orig.jpg
+```
+
+The original file is saved (`-orig` at the end), in a max of 2000x2000 pixels, for later resizing.
 
 ## Installation
 
