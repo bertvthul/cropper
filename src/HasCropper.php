@@ -30,7 +30,7 @@ trait HasCropper
     }
 
     protected function initCropper() {
-
+        
     }
 
     protected function beforeCropImages()
@@ -46,11 +46,6 @@ trait HasCropper
         foreach($cropperFields as $name => $settings) {
             $this->validateImage($name);
         }
-    }
-
-    protected function saveTempImage($name)
-    {
-        // $image = request('cropper.' . $name);
     }
 
     protected function cropImages()
