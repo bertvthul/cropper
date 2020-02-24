@@ -15,7 +15,7 @@ class User
 {
     use HasCropper;
 
-	public static $cropper = [
+    public static $cropper = [
         'avatar' => [
             'validation' => [
                 'required' => true,
@@ -29,10 +29,10 @@ class User
 Images are saved using the logic;
 ```
 public
-	images
-		user (model name)
-			1-avatar.jpg (id-fieldname)
-			1-avatar-orig.jpg
+    images
+        user (model name)
+            1-avatar.jpg (id-fieldname)
+            1-avatar-orig.jpg
 ```
 
 The original file is saved (`-orig` at the end), in a max of 2000x2000 pixels, for later resizing.
@@ -80,7 +80,7 @@ class User
 {
     use HasCropper;
 
-	public static $cropper = [
+    public static $cropper = [
         'avatar' => [
             'validation' => [
                 'required' => true,
@@ -100,8 +100,12 @@ In this example the fieldname is `avatar`. The key is the fieldname and the cont
 ],
 'width' => 200,
 'height' => 200,
-```   
+```
 
+Displaying the images can be done, by adding the following to your blade file;
+```html
+{!! $user->cropper['avatar'] !!}
+```
 
 ## License
 

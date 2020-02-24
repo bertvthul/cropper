@@ -9,6 +9,15 @@ trait HasCropper
 {
     private $imagesFields = [];
     private $startId = 0;
+    private $defaultSettings = [
+        'validation' => [
+            'filetypes' => 'jpeg,png,jpg,gif,svg',
+            'max'       => 2048,
+            'required'  => true,
+        ],
+        'width' => 200,
+        'height' => 200,
+    ];
 
     public static function bootHasCropper()
     {
@@ -30,7 +39,7 @@ trait HasCropper
     }
 
     protected function initCropper() {
-        
+
     }
 
     protected function beforeCropImages()
@@ -60,7 +69,6 @@ trait HasCropper
             $this->cropAndUpload($name);
         }
 
-        ### delete temp images
         $this->deleteTempImages($this->id);
         $this->deleteTempImages(0);
     }
@@ -170,18 +178,13 @@ trait HasCropper
         return pathinfo($image[0], PATHINFO_EXTENSION);
     }
 
-     private function getSettings($name) {
-        $defaultSettings = [
-            'validation' => [
-                'filetypes' => 'jpeg,png,jpg,gif,svg',
-                'max'       => 2048,
-                'required'  => true,
-            ],
-            'width' => 200,
-            'height' => 200,
-        ];
+     private function getSettings($name): array
+     {
+        $settings = !empty(static::$cropper[$name]) ? 
+            array_replace_recursive($this->defaultSettings, static::$cropper[$name]) : 
+            $this->defaultSettings;
 
-        return !empty(static::$cropper[$name]) ? array_replace_recursive($defaultSettings, static::$cropper[$name]) : $defaultSettings;
+        return $settings;
     }
 
     private function validateImage($name, $settings = []) 
@@ -199,11 +202,6 @@ trait HasCropper
             $validationRules = $this->getValidationRules($name, $this->getId());
             $validationRulesAll['cropper.' . $name] = implode('|', $validationRules);
         }
-
-        // if (empty($settings)) {
-        //     $settings = $this->getSettings($name);
-        // }
-
 
         return request()->validate($validationRulesAll);
     }
@@ -407,33 +405,40 @@ trait HasCropper
             $imageRatioRev = 1;
         }
 
+        $extraClasses = [];
+        $extraClasses[] = 'cropper__crop--' . $name;
+        $extraClasses[] = 'cropper__crop--' . ($imageRatio > $cropRatio ? 'higher' : 'wider');
+        if (empty($imagePathCropped) || (!is_null(old('cropperx.' . $name)) || !is_null(old('croppery.' . $name)))) {
+            $extraClasses[] = 'cropper__crop--cropping';
+        }
+
         $html = '';
-        $html .= '<div class="loading fa-2x"><i class="fas fa-circle-notch fa-spin"></i></div>';
-        $html .= '<div class="cropper-example-con cropper-example-' . $name . (empty($imagePathCropped) ? ' can-crop' : '') . ($imageRatio > $cropRatio ? ' higher' : ' wider' ) . '">';
-        if (!empty($imagePathCropped)) {
-            $html.= '<div class="cropped-thumb" style="background-image:url('. asset($imagePathCropped) .');"></div>';
-        }
-
         if (empty($imagePath)) {
-            $html .= '<label for="cropper-' . $name . '" class="empty-field-upload-button"><span class="btn btn-sm btn-success"><i class="fa fa-upload"></i></span> Upload afbeelding</label>';
+            $html .= '<label for="cropper-' . $name . '" class="cropper__upload"><span class="btn btn-sm btn-success"><i class="fa fa-upload"></i></span> Upload afbeelding</label>';
         }
 
-        $html .= '<div class="scale-options' . ($imageRatio > $cropRatio ? ' higher' : ' wider' ) . '">';
-        $html .= '<span class="btn btn-arrow-up"><i class="fa fa-chevron-up"></i></span>';
-        $html .= '<span class="btn btn-arrow-down"><i class="fa fa-chevron-down"></i></span>';
+        $html .= '<div class="cropper__crop ' . implode(' ', $extraClasses) . '">';
+
+            $html.= '<div class="cropper__example"' . ($imagePathCropped ? ' style="background-image:url('. asset($imagePathCropped) .');"' : '') . '></div>';
+            $html.= '<div class="cropper__image-con" style="padding-top:' . (round($cropRatio * 100) / 100) . '%;">';
+                $html .= '<div class="cropper__image" style="' . ($imageRatio > $cropRatio ? 'width: 100%;padding-top:' . (round($imageRatio * 100) / 100) . '%;' : 'width: ' . ((100 / $cropRatioRev) * $imageRatioRev) . '%;height:100%;' ) . 'background-image: url(' .  asset($imagePath) . '?' . rand(10000,99999) . ');"></div>';
+            $html.= '</div>';
+
+            $html .= '<div class="cropper__croptools">';
+                $html .= '<span class="btn btn-arrow-up"><i class="fa fa-chevron-up"></i></span>';
+                $html .= '<span class="btn btn-arrow-down"><i class="fa fa-chevron-down"></i></span>';
+            $html .= '</div>';
+
+
+            $html.= '<div class="cropper__options">';
+                $html .= '<label class="cropper__upload btn btn-sm btn-success" for="cropper-' . $name . '" title="Upload een foto"><i class="fa fa-upload"></i></label>';
+                
+                $html.= '<div class="cropper__recrop btn btn-sm btn-success" title="Opnieuw uitsnijden"><i class="fa fa-crop"></i></div>';
+                
+                $html.= '<span class="cropper__savecrop btn btn-sm btn-success" title="Uitsnede opslaan"><i class="fa fa-check"></i></span>';
+            $html.= '</div>';
+
         $html .= '</div>';
-
-        $html.= '<div class="cropper-options">';
-        $html .= '<label class="btn btn-sm btn-success btn-cropper-upload" for="cropper-' . $name . '"><i class="fa fa-upload"></i></label>';
-        if (!empty($imagePathCropped)) {
-            $html.= '<div class="btn btn-sm btn-success recrop"><i class="fa fa-crop"></i></div>';
-        }
-        $html.= '</div>';
-        $html .= '<div class="crop-example' . ($imageRatio > $cropRatio ? ' higher' : ' wider' ) . '" style="padding-top:' . (round($cropRatio * 100) / 100) . '%;">';
-
-        $html .= '<div class="crop-image" style="' . ($imageRatio > $cropRatio ? 'width: 100%;padding-top:' . (round($imageRatio * 100) / 100) . '%;' : 'width: ' . ((100 / $cropRatioRev) * $imageRatioRev) . '%;height:100%;' ) . 'background-image: url(' .  asset($imagePath) . '?' . rand(10000,99999) . ');"></div>
-        </div>
-        </div>';
 
         return $html;
     }

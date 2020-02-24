@@ -51,15 +51,15 @@ class CropperDirectives
                 $cropRatio = (100 / $width) * $height;
 
                 if ($cropRatio < 75 && $width > 800) {
-                    $imageStyle = 'wide-large';
+                    $imageStyle = 'landscape';
                 } elseif ($cropRatio < 100) {
-                    $imageStyle = 'wide';
+                    $imageStyle = 'wider';
                 } elseif ($cropRatio == 100) {
                     $imageStyle = 'square';
                 } elseif ($cropRatio > 120 && $height > 800) {
-                    $imageStyle = 'high-large';
+                    $imageStyle = 'portrait';
                 } else {
-                    $imageStyle = 'high';
+                    $imageStyle = 'higher';
                 }
             }
         }
@@ -93,15 +93,24 @@ class CropperDirectives
             $model->deleteTempImages($id);
         }
 
+        $extraClasses = [];
+        $extraClasses[] = 'cropper--' . $imageStyle;
+        if (empty($imagePath)) {
+            $extraClasses[] = 'cropper--no-image';
+        }
         // html
         $html = '';
-        $html .= '<div class="cropper-con' . (empty($imagePath) ? ' no-image-yet' : '') . ' image-style-' . $imageStyle . '" data-model="' . $modelName . '" data-name="' . $name . '" data-id="' . $id . '">';
-        $html .= '<div class="cropper-slice-html-example">';
-        $html .= $model->getCropperSliceHtml($name, $imagePath, $imagePathCropped);
-        $html .= '</div>';
-        $html .= '<input type="hidden" name="cropperx[' . $name . ']" class="cropperx" placeholder="x positie" value="' . old('cropperx.' . $name) . '">';
-        $html .= '<input type="hidden" name="croppery[' . $name . ']" class="croppery" placeholder="y positie" value="'. old('croppery.' . $name) . '">';
-		$html .= '<input type="file" class="img-cropper' . (!is_null($class) ? ' ' . $class : '') . '" name="cropper[' . $name . ']" id="cropper-' . $name . '">';
+        $html .= '<div class="cropper ' . implode(' ', $extraClasses) . '" data-model="' . $modelName . '" data-name="' . $name . '" data-id="' . $id . '">';
+
+            $html .= '<div class="cropper__load-indicator fa-2x"><i class="fas fa-circle-notch fa-spin"></i></div>';
+            $html .= '<div class="cropper__editor">';
+                $html .= $model->getCropperSliceHtml($name, $imagePath, $imagePathCropped);
+            $html .= '</div>';
+
+            $html .= '<input type="hidden" name="cropperx[' . $name . ']" class="cropperx" placeholder="x positie" value="' . old('cropperx.' . $name) . '">';
+            $html .= '<input type="hidden" name="croppery[' . $name . ']" class="croppery" placeholder="y positie" value="'. old('croppery.' . $name) . '">';
+    		$html .= '<input type="file" class="img-cropper' . (!is_null($class) ? ' ' . $class : '') . '" name="cropper[' . $name . ']" id="cropper-' . $name . '">';
+
         $html .= '</div>';
 
 		return $html;
