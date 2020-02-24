@@ -17,6 +17,8 @@ trait HasCropper
         ],
         'width' => 200,
         'height' => 200,
+        'upload-text' => 'Upload afbeelding',
+        'class' => '',
     ];
 
     public static function bootHasCropper()
@@ -414,7 +416,7 @@ trait HasCropper
 
         $html = '';
         if (empty($imagePath)) {
-            $html .= '<label for="cropper-' . $name . '" class="cropper__upload"><span class="btn btn-sm btn-success"><i class="fa fa-upload"></i></span> Upload afbeelding</label>';
+            $html .= '<label for="cropper-' . $name . '" class="cropper__upload"><span class="btn btn-sm btn-success"><i class="fa fa-upload"></i></span> ' . $settings['upload-text'] . '</label>';
         }
 
         $html .= '<div class="cropper__crop ' . implode(' ', $extraClasses) . '">';
@@ -431,9 +433,9 @@ trait HasCropper
 
 
             $html.= '<div class="cropper__options">';
-                $html .= '<label class="cropper__upload btn btn-sm btn-success" for="cropper-' . $name . '" title="Upload een foto"><i class="fa fa-upload"></i></label>';
+                $html .= '<label class="cropper__upload btn btn-sm btn-success" for="cropper-' . $name . '" title="' . $settings['upload-text'] . '"><i class="fa fa-upload"></i></label>';
                 
-                $html.= '<div class="cropper__recrop btn btn-sm btn-success" title="Opnieuw uitsnijden"><i class="fa fa-crop"></i></div>';
+                $html.= '<div class="cropper__recrop btn btn-sm btn-success" title="Opnieuw uitsnijden (' . $width . '&times;' . $height . ')"><i class="fa fa-crop"></i></div>';
                 
                 $html.= '<span class="cropper__savecrop btn btn-sm btn-success" title="Uitsnede opslaan"><i class="fa fa-check"></i></span>';
             $html.= '</div>';

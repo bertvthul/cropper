@@ -20,14 +20,14 @@ $(function() {
             var extraHeight = $(this).closest('.cropper__crop').find('.cropper__image').outerHeight() - $(this).closest('.cropper__crop').find('.cropper__image-con').outerHeight();
             var currentScrolltop = $(this).closest('.cropper__crop').find('.cropper__image-con').scrollTop();
             // $(this).closest('.cropper__crop').find('.cropper__image-con').scrollTop(currentScrolltop + (extraHeight / 10));
-            $(this).closest('.cropper__crop').find('.cropper__image-con').animate({scrollTop: currentScrolltop + (extraHeight / 4)});
+            $(this).closest('.cropper__crop').find('.cropper__image-con').animate({scrollTop: currentScrolltop + (extraHeight / 4)}, 300);
 
         } else {
             var extraWidth = $(this).closest('.cropper__crop').find('.cropper__image').outerWidth() - $(this).closest('.cropper__crop').find('.cropper__image-con').outerWidth();
             var currentScrollleft = $(this).closest('.cropper__crop').find('.cropper__image-con').scrollLeft();
             console.log($(this).closest('.cropper__crop').find('.cropper__image').outerWidth());
             // $(this).closest('.cropper__crop').find('.cropper__image-con').scrollLeft(currentScrollleft + (extraWidth / 10));
-            $(this).closest('.cropper__crop').find('.cropper__image-con').animate({scrollLeft: currentScrollleft + (extraWidth / 4)});
+            $(this).closest('.cropper__crop').find('.cropper__image-con').animate({scrollLeft: currentScrollleft + (extraWidth / 4)}, 300);
 
         }
         // 
@@ -38,12 +38,12 @@ $(function() {
             var extraHeight = $(this).closest('.cropper__crop').find('.cropper__image').outerHeight() - $(this).closest('.cropper__crop').find('.cropper__image-con').outerHeight();
             var currentScrolltop = $(this).closest('.cropper__crop').find('.cropper__image-con').scrollTop();
             // $(this).closest('.cropper__crop').find('.cropper__image-con').scrollTop(currentScrolltop - (extraHeight / 10));
-            $(this).closest('.cropper__crop').find('.cropper__image-con').animate({scrollTop: currentScrolltop - (extraHeight / 4)});
+            $(this).closest('.cropper__crop').find('.cropper__image-con').animate({scrollTop: currentScrolltop - (extraHeight / 4)}, 300);
         } else {
             var extraWidth = $(this).closest('.cropper__crop').find('.cropper__image').outerWidth() - $(this).closest('.cropper__crop').find('.cropper__image-con').outerWidth();
             var currentScrollleft = $(this).closest('.cropper__crop').find('.cropper__image-con').scrollLeft();
             // $(this).closest('.cropper__crop').find('.cropper__image-con').scrollLeft(currentScrollleft - (extraWidth / 10));
-            $(this).closest('.cropper__crop').find('.cropper__image-con').animate({scrollLeft: currentScrollleft - (extraWidth / 4)});
+            $(this).closest('.cropper__crop').find('.cropper__image-con').animate({scrollLeft: currentScrollleft - (extraWidth / 4)}, 300);
         }
         // 
     });

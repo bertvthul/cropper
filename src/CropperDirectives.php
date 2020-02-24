@@ -95,6 +95,10 @@ class CropperDirectives
 
         $extraClasses = [];
         $extraClasses[] = 'cropper--' . $imageStyle;
+        $extraClasses[] = 'cropper--' . $name;
+        if (!empty($settings[$name]['class'])) {
+            $extraClasses[] = $settings[$name]['class'];
+        }
         if (empty($imagePath)) {
             $extraClasses[] = 'cropper--no-image';
         }
