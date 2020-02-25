@@ -12,7 +12,7 @@ trait HasCropper
     private $defaultSettings = [
         'validation' => [
             'filetypes' => 'jpeg,png,jpg,gif,svg',
-            'max'       => 2048,
+            'max'       => 20480, // 20 mb
             'required'  => true,
         ],
         'width' => 200,
@@ -240,7 +240,8 @@ trait HasCropper
         return $validationRules;
     }
 
-    private function uploadImage($name) {
+    private function uploadImage($name)
+    {
         $image = request('cropper.' . $name);
 
         // image name
@@ -248,7 +249,26 @@ trait HasCropper
         $image->move(public_path($this->getFolder()), $imageName);
     }
 
-    private function cropAndUpload($name) {
+    private function deleteOldImages($name): void
+    {
+        // Delete old images (not the temp(!), because its used for upload)
+        $id = $this->getId();
+        $imageLocation = public_path() . '\images\\' . $this->getModelFolderName() . '\\';
+
+        $oldImage = glob($imageLocation . $id . '-' . $name . '.*');
+        if(!empty($oldImage[0])) {
+            unlink($oldImage[0]);
+        }
+
+        $oldOrigImage = glob($imageLocation . $id . '-' . $name . '-orig.*');
+        if(!empty($oldOrigImage[0])) {
+            unlink($oldOrigImage[0]);
+        }
+    }
+
+    private function cropAndUpload($name)
+    {
+        $id = $this->getId();
         $image = request('cropper.' . $name);
         if (is_null($image)) {
             // check if there is an old temp image to use
@@ -263,10 +283,15 @@ trait HasCropper
             $image_real_path = $image->getRealPath();
         }
 
+        if (!is_null($image)) {
+            // wis bestaande afbeelding
+            $this->deleteOldImages($name);
+        }
+
         if (is_null($image)) {
             if (!is_null(request('cropperx.' . $name)) || !is_null(request('croppery.' . $name))) {
                 // Crop een bestaand beeld
-                $imageNameOriginal = $this->getId() . '-' . $name . '-orig';
+                $imageNameOriginal = $id . '-' . $name . '-orig';
                 $ext = $this->getImageExtension($imageNameOriginal);
                 if (!$ext) {
                     // Geen eerder geupload bestand
@@ -280,7 +305,7 @@ trait HasCropper
         }
         $settings = $this->getSettings($name);
 
-        $imageNameOriginal = $this->getId() . '-' . $name . '-orig.' . $ext;
+        $imageNameOriginal = $id . '-' . $name . '-orig.' . $ext;
         $destinationPath = public_path($this->getFolder());
 
         // Save cropped image
@@ -309,7 +334,8 @@ trait HasCropper
         return true;
     }
 
-    private function cropToFit($name, $croppedImage, $ext) {
+    private function cropToFit($name, $croppedImage, $ext)
+    {
         $settings = $this->getSettings($name);
         if (is_null($croppedImage)) {
             return;
