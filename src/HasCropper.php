@@ -8,7 +8,7 @@ use Image;
 trait HasCropper
 {
     private $imagesFields = [];
-    private $startId = 0;
+    public $startId = 0;
     private $defaultSettings = [
         'validation' => [
             'filetypes' => 'jpeg,png,jpg,gif,svg',
@@ -266,7 +266,7 @@ trait HasCropper
         }
     }
 
-    private function cropAndUpload($name)
+    public function cropAndUpload($name)
     {
         $id = $this->getId();
         $image = request('cropper.' . $name);
@@ -375,7 +375,15 @@ trait HasCropper
     }
 
     private function getId() {
-        return !empty($this->attributes['id']) ? (int)$this->attributes['id'] : 0;
+        if (!empty($this->attributes['id'])) {
+            return (int)$this->attributes['id'];
+        }
+
+        if (!empty(request('id'))) {
+            return (int)request('id');
+        }
+
+        return 0;
     }
 
     public function xhrUploadCropper() {

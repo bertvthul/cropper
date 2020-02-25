@@ -13,6 +13,39 @@ $(function() {
     })
     .on('click', '.cropper__savecrop', function() {
          $(this).closest('.cropper__editor').find('.cropper__crop').removeClass('cropper__crop--cropping');
+
+         if (!$(this).parents('form')[0]) {
+            // als dit veld niet in een formulier staat, sla het dan direct op
+            var cropperObj = $(this).closest('.cropper');
+            var data = {'quicksave': true};
+            var fieldname = $(cropperObj).data('name');
+            data.model = $(cropperObj).data('model');
+            data.name = fieldname;
+            data.id = $(cropperObj).data('id');
+            data.cropperx = {};
+            data.croppery = {};
+            data.cropperx[fieldname] = $(cropperObj).find('.cropperx').val();
+            data.croppery[fieldname] = $(cropperObj).find('.croppery').val();
+            data.cropperx[fieldname] = parseInt(data.cropperx[fieldname]) || 0;
+            data.croppery[fieldname] = parseInt(data.croppery[fieldname]) || 0;
+            $.ajax({
+                type:'POST',
+                url:'/cropperxhrRequest',
+                data:data,
+                success: function(data) {
+                }
+            });
+         } else {
+            // gewoon een formulier
+            // zet nog wel even de cropper x en y op 0 wanneer die geen waarde hebben
+            var cropperObj = $(this).closest('.cropper');
+            if ($(cropperObj).find('.cropperx').val() == '') {
+                $(cropperObj).find('.cropperx').val(0);
+            }
+            if ($(cropperObj).find('.croppery').val() == '') {
+                $(cropperObj).find('.croppery').val(0);
+            }
+         }
     })
     .on('click', '.cropper__croptools .btn-arrow-down', function() {
         console.log('down');
