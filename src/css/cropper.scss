@@ -125,6 +125,14 @@
 				display: none;
 			}
 
+			.cropper--inline-save & {
+				opacity: 0;
+				transition: opacity .3s ease;
+			}
+			.cropper--inline-save:hover & {
+				opacity: 1;
+			}
+
 			.btn {
 				margin: 2px;
 			}

@@ -17,6 +17,7 @@ $(function() {
          if (!$(this).parents('form')[0]) {
             // als dit veld niet in een formulier staat, sla het dan direct op
             var cropperObj = $(this).closest('.cropper');
+            cropperObj.addClass('cropper--loading');
             var data = {'quicksave': true};
             var fieldname = $(cropperObj).data('name');
             data.model = $(cropperObj).data('model');
@@ -33,7 +34,11 @@ $(function() {
                 url:'/cropperxhrRequest',
                 data:data,
                 success: function(data) {
-                }
+                    cropperObj.removeClass('cropper--loading');
+                },
+                error: function(data) {
+                    cropperObj.removeClass('cropper--loading');
+                },
             });
          } else {
             // gewoon een formulier

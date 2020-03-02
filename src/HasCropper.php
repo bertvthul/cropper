@@ -17,8 +17,7 @@ trait HasCropper
         ],
         'width' => 200,
         'height' => 200,
-        'upload-text' => 'Upload afbeelding',
-        'class' => '',
+        'upload-text' => 'Upload',
     ];
 
     public static function bootHasCropper()
@@ -117,15 +116,16 @@ trait HasCropper
         }
 
         foreach (static::$cropper as $field_name => $field_settings) {
+            $mutators[$field_name] = [];
             if ($ext = $this->getImageExtension($id . '-' . $field_name)) {
-                $image_url = asset($this->getFolder() . '/' . $id . '-' . $field_name . '.' . $ext); 
-                $mutators[$field_name] = '<img src="' . $image_url . '" style="max-width: 100%; height: auto;">';
-            } else {
-                $mutators[$field_name] = '';
+                $mutators[$field_name]['path'] = asset($this->getFolder() . '/' . $id . '-' . $field_name . '.' . $ext); 
+                $mutators[$field_name]['path_original'] = asset($this->getFolder() . '/' . $id . '-' . $field_name . '-orig.' . $ext); 
+                $mutators[$field_name]['ext'] = $ext; 
+                $mutators[$field_name]['name'] = $id . '-' . $field_name . '.' . $ext; 
             }
         }
 
-        return $mutators;
+        return json_decode(json_encode($mutators));
     }
 
     public function getCropperPathsAttribute($id = 0) {
@@ -374,13 +374,25 @@ trait HasCropper
         $croppedImage->save($destinationPath . '/' . $imageName);
     }
 
-    private function getId() {
+    public function getId() {
         if (!empty($this->attributes['id'])) {
             return (int)$this->attributes['id'];
         }
 
         if (!empty(request('id'))) {
             return (int)request('id');
+        }
+
+        if (!is_null(request()->route('id'))) {
+            return request()->route('id');
+        } 
+
+        if(!empty(request()->route()->originalParameters())) {
+            foreach(request()->route()->originalParameters() as $paramName => $paramValue) {
+                if (!empty((int)$paramValue)) {
+                    return (int)$paramValue;
+                }
+            }
         }
 
         return 0;
