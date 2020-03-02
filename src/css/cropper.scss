@@ -1,8 +1,8 @@
 .cropper {
-	border: 1px solid #ddd;
 	position: relative;
 	width: 200px;
 	max-width: 100%;
+	background: rgba(0,0,0,0.05);
 
 	&.cropper--landscape {
 		width: 800px;

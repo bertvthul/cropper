@@ -1,6 +1,6 @@
 {
     "name": "bertvthul/cropper",
-    "description": "Crop images the easy way",
+    "description": "Simple upload and crop images in Laravel",
     "keywords": [
         "images",
         "upload",
@@ -21,7 +21,7 @@
     ],
     "require": {
         "php" : "^7.0",
-        "illuminate/view": "~5.5.0|~5.6.0|~5.7.0|~5.8.0|^6.0"
+        "intervention/image": "^2.5"
     },
     "autoload": {
         "psr-4": {

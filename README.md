@@ -1,4 +1,4 @@
-# Simple upload and crop images for Laravel
+# Simple upload and crop images in Laravel
 
 A simple uploader for your images in Laravel. No database columns needed, due to saving the images using the field name, the id and using the model name as the folder to save in.  
 
@@ -128,14 +128,8 @@ Available are;
 ###### Inline editing
 Editing the images is also possible inline. This means you don't have to place it in a form. The package then saves the changes on the fly. Usefull when you want users to easily update their image. 
 
-###### Displaying images
-Displaying the images can be done, by adding the following to your blade file;
-```html
-{!! $user->cropper['avatar'] !!}
-```
-
-###### No database column needed
-Using a logic naming convention, so no need to save the image in the database.
+###### No database columns needed
+Using a logical naming convention, so no need to save the image in the database.
 
 ## License
 
