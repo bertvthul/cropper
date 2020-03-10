@@ -84,6 +84,14 @@ $(function() {
             $(this).closest('.cropper__crop').find('.cropper__image-con').animate({scrollLeft: currentScrollleft - (extraWidth / 4)}, 300);
         }
         // 
+    })
+    .on('click', 'label.cropper__upload', function(e) {
+        if ($(this).closest('.cropper').hasClass('cropper--has-modal')) {
+            e.preventDefault();
+            var name = $(this).closest('.cropper').data('name');
+            var model = $(this).closest('.cropper').data('model');
+            popModal(name, model);
+        }
     });
 
     document.addEventListener('scroll', function (event) {
@@ -217,6 +225,38 @@ $(function() {
                     $(this).find('.cropper__image-con').scrollTop(extraHeight * (croppery / 100));
                 }
             }
+        });
+    }
+
+    function popModal(name, model) {
+        if($('#cropper-modal').length) {
+            // set modal variables (name)
+            $('#cropper-modal').attr('data-name', name);
+
+            // show modal
+            $('#cropper-modal').modal('show');
+
+        } else {
+            initModal(name, model);
+        }
+    }
+
+    function initModal(name, model) {
+        // Create modal when not present in the dom
+        var data = {'type': 'initModal', 'name': name, 'model': model};
+        $.ajax({
+            type:'POST',
+            url:'/cropperxhrRequest',
+            data:data,
+            success: function(data) {
+                $('body').append(data.html);
+                console.log(name);
+                popModal(name, model);
+            },
+            error: function(data) {
+                console.log(data);
+                alert('error bij aanmaken modal, zie console');
+            },
         });
     }
 

@@ -60,6 +60,11 @@ require('./../../vendor/bertvthul/cropper/src/js/cropper.js');
 @import './../../vendor/bertvthul/cropper/src/css/cropper.scss';
 ```
 
+Publish the files, like the config (optional)
+```bash
+php artisan vendor:publish --provider=Bertvthul\Cropper\CropperServiceProvider
+```
+
 ## Usage
 
 In your blade file you can add the upload field;

@@ -14,6 +14,7 @@ class CropperServiceProvider extends ServiceProvider
 
     public function boot()
     {
+        // Directives
         $directives = CropperDirectives::class;
         foreach(get_class_methods($directives) as $method) {
             Blade::directive($method, function ($expression) use ($directives, $method) {
@@ -21,6 +22,12 @@ class CropperServiceProvider extends ServiceProvider
             });
         }
 
+        // Controllers
         $this->app->make('Bertvthul\Cropper\CropperController');
+
+        // Config
+        $this->publishes([
+            __DIR__.'/cropper-config.php' => config_path('cropper.php'),
+        ]);
     }
 }

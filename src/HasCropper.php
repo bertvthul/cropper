@@ -4,6 +4,7 @@ namespace Bertvthul\Cropper;
 
 use Illuminate\Support\Facades\Storage;
 use Image;
+use Bertvthul\Cropper\PixabayMedia;
 
 trait HasCropper
 {
@@ -15,8 +16,8 @@ trait HasCropper
             'max'       => 20480, // 20 mb
             'required'  => true,
         ],
-        'width' => 200,
-        'height' => 200,
+        'width' => 400,
+        'height' => 400,
         'upload-text' => 'Upload',
     ];
 
@@ -489,5 +490,57 @@ trait HasCropper
         $html .= '</div>';
 
         return $html;
+    }
+
+    public function getCropperModal(string $name): string
+    {
+        ### todo: dit laden vanuit blade views!!
+
+        $html = '';
+        $html .= '<div id="cropper-modal" data-name="' . $name . '" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">';
+            $html .= '<div class="modal-dialog modal-lg" role="document">';
+                $html .= '<div class="modal-content">';
+                    $html .= '<div class="modal-header">';
+                        $html .= '<h5 class="modal-title">Media uploaden</h5>';
+                        $html .= '<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>';
+                    $html .= '</div>';
+                    $html .= '<div class="modal-body">';
+                        $html .= $this->getModalContent($name);
+                    $html .= '</div>';
+                    $html .= '<div class="modal-footer">';
+                        $html .= '<button type="button" class="btn btn-primary">Upload</button>';
+                        $html .= '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>';
+                    $html .= '</div>';
+                $html .= '</div>';
+            $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    private function getModalContent(string $name)
+    {
+        $html = '';
+        $html .= '<div class="row">';
+        $html .= '<div class="col-md-4">';
+        $html .= '<ul class="navbar-nav">';
+        $html .= '<li class="nav-item"><a class="nav-link">Uploaden</a></li>';
+        $html .= '<li class="nav-item"><a class="nav-link">Eerder geupload</a></li>';
+        $html .= '<li class="nav-item"><a class="nav-link">Zoeken</a></li>';
+        $html .= '</ul>';
+        $html .= '</div>';
+        $html .= '<div id="cropper-modal-tab" class="col-md-8">';
+        $html .= $this->getCropperModalStock();
+        $html .= '</div>';
+        $html .= '</div>';
+
+        return $html;
+    }
+
+    private function getCropperModalStock()
+    {
+        return PixabayMedia::listImages('strand');
     }
 }

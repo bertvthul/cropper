@@ -9,28 +9,36 @@ class CropperController extends Controller
 {
     public function call(Request $request)
     {
-        $modelName = request('model');
+        $success = true;
+        $requestType = request('type') ?? 'upload';
         $name = request('name');
-        $quicksave = request('quicksave') ?? false;
+        $modelName = request('model');
         $model = app()->make($modelName);
-        if (request('file')) {
-            $imageName = $model->xhrUploadCropper();
-            $cropHtml = $model->getCropperSliceHtml($name, $imageName);
-        } elseif($quicksave) {
-            // quicksave
-            $id = request('id');
-            $model->startId = (int)$id;
-            $success = $model->cropAndUpload($name);
-            $cropHtml = 'quicksave ' . $name . ' ' . ($success ? 'success' : 'failed');
-        } else {
-            // not possible
-            return;
+
+        if ($requestType == 'initModal') {
+             $html = $model->getCropperModal($name);
+        } elseif ($requestType == 'upload') {
+
+            $quicksave = request('quicksave') ?? false;
+            if (request('file')) {
+                $imageName = $model->xhrUploadCropper();
+                $html = $model->getCropperSliceHtml($name, $imageName);
+            } elseif($quicksave) {
+                // quicksave
+                $id = request('id');
+                $model->startId = (int)$id;
+                $success = $model->cropAndUpload($name);
+                $html = 'quicksave ' . $name . ' ' . ($success ? 'success' : 'failed');
+            } else {
+                // not possible
+                return;
+            }
         }
    
         return response()->json([
-            'success'   => true,
+            'success'   => $success,
             'image'     => $imageName ?? '',
-            'html'      => $cropHtml,
+            'html'      => $html,
             'name'      => $name,
         ]);
     }

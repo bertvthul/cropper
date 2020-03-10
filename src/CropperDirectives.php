@@ -57,6 +57,11 @@ class CropperDirectives
             $model->deleteTempImages($id);
         }
 
+        $hasModal = false;
+        if (\Config::get('cropper.media_library.active') || \Config::get('cropper.stock_library.active')) {
+            $hasModal = true;
+        }
+
         $extraClasses = [];
         $extraClasses[] = 'cropper--' . $imageStyle;
         $extraClasses[] = 'cropper--' . $name;
@@ -72,6 +77,16 @@ class CropperDirectives
         if (!empty($options['class'])) {
             $extraClasses[] = $options['class'];
         }
+        if ($hasModal) {
+            $extraClasses[] = 'cropper--has-modal';
+        }
+        if (\Config::get('cropper.media_library.active')) {
+            $extraClasses[] = 'cropper--has-media-library';
+        }
+        if (\Config::get('cropper.stock_library.active')) {
+            $extraClasses[] = 'cropper--has-stock-library';
+        }
+        
         // html
         $html = '';
         $html .= '<div class="cropper ' . implode(' ', $extraClasses) . '" data-model="' . $modelName . '" data-name="' . $name . '" data-id="' . $id . '">';
@@ -86,6 +101,8 @@ class CropperDirectives
     		$html .= '<input type="file" class="img-cropper" name="cropper[' . $name . ']" id="cropper-' . $name . '">';
 
         $html .= '</div>';
+
+        // $html .= PixabayMedia::listImages('wielrennen');
 
 		return $html;
     }

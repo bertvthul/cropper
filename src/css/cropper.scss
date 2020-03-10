@@ -1,11 +1,11 @@
 .cropper {
 	position: relative;
-	width: 200px;
+	width: 250px;
 	max-width: 100%;
 	background: rgba(0,0,0,0.05);
 
 	&.cropper--landscape {
-		width: 800px;
+		width: 100%;
 	}
 	&.cropper--wider {
 		width: 260px;
