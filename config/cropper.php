@@ -12,4 +12,5 @@ return [
 			],
 		],
 	],
+	'defaultMedia' => 'library',
 ];

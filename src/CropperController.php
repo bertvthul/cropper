@@ -15,8 +15,24 @@ class CropperController extends Controller
         $modelName = request('model');
         $model = app()->make($modelName);
 
-        if ($requestType == 'initModal') {
-             $html = $model->getCropperModal($name);
+        if ($requestType == 'imageUrlUpload') {
+            $imageUrl = request('imageUrl');
+            $imageName = $model->uploadCropperImageByUrl($imageUrl);
+            $html = $model->getCropperSliceHtml($name, $imageName);
+        } elseif ($requestType == 'imagePathUpload') {
+            $imagePath = request('imagePath');
+            $imageName = $model->uploadCropperImageByPath($imagePath);
+            $html = $model->getCropperSliceHtml($name, $imageName);
+        } elseif ($requestType == 'stockSearch') {
+            $searchTerm = request('q');
+            $images = PixabayMedia::findImages($searchTerm);
+
+            $html = view('cropper::modal_stock_list')->withImages($images)->withSearchTerm($searchTerm)->render();
+        } elseif ($requestType == 'initModal') {
+            $html = $model->getCropperModal($name, $modelName);
+         } elseif ($requestType == 'modalNav') {
+            $content = request('content');
+            $html = $model->getModalTabContent($content, $name);
         } elseif ($requestType == 'upload') {
 
             $quicksave = request('quicksave') ?? false;

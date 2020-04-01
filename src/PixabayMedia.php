@@ -32,7 +32,33 @@ class PixabayMedia {
 		$images = json_decode($response, true);
 		curl_close($curl);
 
-		return $images;
+		return self::mapImages($images);
+	}
+
+	public static function mapImages(array $images)
+	{
+		$mappedImages = [];
+
+		foreach($images['hits'] as $image) {
+			$mappedImage = [
+				'name' 		=> $image['tags'],
+				'thumb' => 	[
+					'url' 		=> $image['previewURL'],
+					'width' 	=> $image['previewWidth'],
+					'height' 	=> $image['previewHeight'],
+				],
+				'original' => 	[
+					'url' 		=> $image['largeImageURL'],
+					'width' 	=> $image['imageWidth'],
+					'height' 	=> $image['imageHeight'],
+				],
+				'credits'	=> $image['user'],
+				'url'		=> $image['pageURL'],
+			];
+			$mappedImages[$image['id']] = $mappedImage;
+		}
+
+		return json_decode(json_encode($mappedImages));
 	}
 
 	public static function listImages(string $q) 

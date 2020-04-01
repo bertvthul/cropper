@@ -10,6 +10,10 @@ class CropperServiceProvider extends ServiceProvider
     public function register()
     {
         $this->loadRoutesFrom(__DIR__.'/routes.php');
+
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/cropper.php', 'cropper'
+        );
     }
 
     public function boot()
@@ -27,7 +31,10 @@ class CropperServiceProvider extends ServiceProvider
 
         // Config
         $this->publishes([
-            __DIR__.'/cropper-config.php' => config_path('cropper.php'),
+            __DIR__.'/../config/cropper.php' => config_path('cropper.php'),
         ]);
+
+        // Views
+        $this->loadViewsFrom(__DIR__.'/views', 'cropper');
     }
 }

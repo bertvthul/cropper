@@ -5,6 +5,7 @@ namespace Bertvthul\Cropper;
 use Illuminate\Support\Facades\Storage;
 use Image;
 use Bertvthul\Cropper\PixabayMedia;
+use Illuminate\Support\Str;
 
 trait HasCropper
 {
@@ -399,6 +400,67 @@ trait HasCropper
         return 0;
     }
 
+    public function uploadCropperImageByUrl(string $imageUrl)
+    {
+        $name = request('name');
+        $id = request('id');
+
+        ### todo: validation
+
+        // Delete old temp image
+        $oldImage = glob(public_path() . '\images\\' . $this->getModelFolderName() . '\\' . $id . '-' . $name . '-temp.*');
+        if(!empty($oldImage[0])) {
+            unlink($oldImage[0]);
+        }
+
+        // props
+        $imageUrlParts = explode('.', $imageUrl);
+        $ext = array_pop($imageUrlParts);
+        $imageName = $id . '-' . $name . '-temp.' . $ext;
+        $destinationPath = public_path($this->getFolder());
+
+        // Save original image (resized)
+        $resizedImage = Image::make($imageUrl);
+        $width = 2000;
+        $height = 2000;
+        if ($resizedImage->width() > $resizedImage->height()) {
+            $width = null;
+        } elseif ($resizedImage->width() < $resizedImage->height()) {
+            $height = null;
+        }
+        $resizedImage->resize($width, $height, function($constraint){
+            $constraint->aspectRatio();
+            $constraint->upsize();
+        })->save($destinationPath . '/' . $imageName);
+
+        return $this->getFolder() . '/' . $imageName;
+    }
+
+    public function uploadCropperImageByPath(string $imagePath)
+    {
+        $name = request('name');
+        $id = request('id');
+
+        ### todo: validation
+
+        // Delete old temp image
+        $oldImage = glob(public_path() . '\images\\' . $this->getModelFolderName() . '\\' . $id . '-' . $name . '-temp.*');
+        if(!empty($oldImage[0])) {
+            unlink($oldImage[0]);
+        }
+
+        // props
+        $imagePathParts = explode('.', $imagePath);
+        $ext = array_pop($imagePathParts);
+        $imageName = $id . '-' . $name . '-temp.' . $ext;
+        $destinationPath = public_path($this->getFolder());
+
+        // Copy original image
+        copy($imagePath, $destinationPath . '/' . $imageName);
+
+        return $this->getFolder() . '/' . $imageName;
+    }
+
     public function xhrUploadCropper() {
         $name = request('name');
         $image = request('file');
@@ -492,55 +554,57 @@ trait HasCropper
         return $html;
     }
 
-    public function getCropperModal(string $name): string
+    public function getCropperModal(string $name, string $model): string
     {
-        ### todo: dit laden vanuit blade views!!
+        $content = $this->getModalContent(config('cropper.defaultMedia'), $name);
 
-        $html = '';
-        $html .= '<div id="cropper-modal" data-name="' . $name . '" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">';
-            $html .= '<div class="modal-dialog modal-lg" role="document">';
-                $html .= '<div class="modal-content">';
-                    $html .= '<div class="modal-header">';
-                        $html .= '<h5 class="modal-title">Media uploaden</h5>';
-                        $html .= '<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                      <span aria-hidden="true">&times;</span>
-                    </button>';
-                    $html .= '</div>';
-                    $html .= '<div class="modal-body">';
-                        $html .= $this->getModalContent($name);
-                    $html .= '</div>';
-                    $html .= '<div class="modal-footer">';
-                        $html .= '<button type="button" class="btn btn-primary">Upload</button>';
-                        $html .= '<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>';
-                    $html .= '</div>';
-                $html .= '</div>';
-            $html .= '</div>';
-        $html .= '</div>';
-
-        return $html;
+        return view('cropper::modal')->withContent($content)->withName($name)->withModel($model)->render();
     }
 
-    private function getModalContent(string $name)
+    private function getModalContent(string $type, string $name)
     {
-        $html = '';
-        $html .= '<div class="row">';
-        $html .= '<div class="col-md-4">';
-        $html .= '<ul class="navbar-nav">';
-        $html .= '<li class="nav-item"><a class="nav-link">Uploaden</a></li>';
-        $html .= '<li class="nav-item"><a class="nav-link">Eerder geupload</a></li>';
-        $html .= '<li class="nav-item"><a class="nav-link">Zoeken</a></li>';
-        $html .= '</ul>';
-        $html .= '</div>';
-        $html .= '<div id="cropper-modal-tab" class="col-md-8">';
-        $html .= $this->getCropperModalStock();
-        $html .= '</div>';
-        $html .= '</div>';
+        $defaultContent = $this->getModalTabContent($type, $name);
 
-        return $html;
+        return view('cropper::modal_content')->withDefaultContent($defaultContent)->withActiveMenu($type)->render();
     }
 
-    private function getCropperModalStock()
+    public function getModalTabContent(string $type, string $name) 
     {
-        return PixabayMedia::listImages('strand');
+        $functionName = 'renderModalContent' . Str::camel($type);
+        return $this->$functionName($name);
+    }
+
+    private function renderModalContentStock(string $name, string $stockApi = 'pixabay'): string
+    {
+        $searchTerm = '';
+        $images = $searchTerm ? PixabayMedia::findImages($searchTerm) : [];
+
+        return view('cropper::modal_stock')->withImages($images)->withSearchTerm($searchTerm)->render();
+    }
+
+    private function renderModalContentUpload(string $name): string
+    {
+        return view('cropper::modal_upload')->render();
+    }
+
+    private function renderModalContentLibrary(string $name): string
+    {
+        // verkrijgen van de library data...
+        $files = glob(public_path() . '\images\\' . $this->getModelFolderName() . '\\*-orig.*');
+        $images = [];
+        foreach($files as $file) {
+            $image = explode('\\', $file);
+            $imageFilename = end($image);
+            $imagePath = $this->getFolder() . '/' . $imageFilename;
+            $uniqueKey = md5(implode('-', getimagesize($imagePath)));
+            $images[$uniqueKey] = [
+                'image' => asset($imagePath),
+                'path' => $imagePath,
+            ];
+        }
+
+        $images = json_decode(json_encode($images));
+
+        return view('cropper::modal_library')->withImages($images)->render();
     }
 }

@@ -92,6 +92,75 @@ $(function() {
             var model = $(this).closest('.cropper').data('model');
             popModal(name, model);
         }
+    })
+    .on('submit', 'form#stock-image-search', function(e) {
+        e.preventDefault();
+        var searchTerm = $(this).find('[name="stock-search-term"]').val();
+        var name = $(this).closest('#cropper-modal').data('name');
+        var model = $(this).closest('#cropper-modal').data('model');
+        var data = {'type': 'stockSearch', 'q': searchTerm, 'model': model, 'name': name};
+        console.log(data);
+        $.ajax({
+            type:'POST',
+            url:'/cropperxhrRequest',
+            data:data,
+            success: function(data) {
+                $('#stock-list').html(data.html);
+            },
+            error: function(data) {
+                console.log(data);
+            },
+        });
+    })
+    .on('click', '.cropper-select-image', function() {
+        $('#cropper-modal').modal('hide');
+        var name = $(this).closest('#cropper-modal').data('name');
+        var cropperObj = $('.cropper[data-name="' + name + '"]');
+        $(cropperObj).addClass('cropper--loading');
+
+        var wasEmpty = false;
+        if ($(cropperObj).hasClass('cropper--no-image')) {
+            wasEmpty = true;
+            $(cropperObj).removeClass('cropper--no-image');
+        }
+
+        var model = $(cropperObj).data('model');
+        var id = $(cropperObj).data('id');
+        var data = {
+            'model': model, 
+            'name': name, 
+            'id': id
+        };
+        var imageUrl = $(this).data('orig-image');
+        if (imageUrl != undefined) {
+            data.type = 'imageUrlUpload';
+            data.imageUrl = imageUrl;
+        } else {
+            var imagePath = $(this).data('image-local-path');
+            data.type = 'imagePathUpload';
+            data.imagePath = imagePath;
+        }
+
+        console.log(data);
+        $.ajax({
+            type:'POST',
+            url:'/cropperxhrRequest',
+            data:data,
+            success: function(data) {
+                $(cropperObj).removeClass('cropper--loading');
+                $(cropperObj).find('.cropper__example').remove();
+                $(cropperObj).find('.cropper__editor').html(data.html);
+                $(cropperObj).find('.cropperx').val(0);
+                $(cropperObj).find('.croppery').val(0);
+            },
+            error: function(data) {
+                $(cropperObj).removeClass('cropper--loading');
+                if (wasEmpty) {
+                    $(cropperObj).addClass('cropper--no-image');
+                }
+                console.log(data);
+            },
+        });          
     });
 
     document.addEventListener('scroll', function (event) {
@@ -189,9 +258,9 @@ $(function() {
             contentType: false,
             processData: false,
             success: function(data) {
+                console.log(data);
                 $(cropperObj).removeClass('cropper--loading');
                 $(cropperObj).find('.cropper__example').remove();
-                console.log(data);
                 $(cropperObj).find('.cropper__editor').html(data.html);
                 $(cropperObj).find('.cropperx').val(0);
                 $(cropperObj).find('.croppery').val(0);
@@ -231,10 +300,13 @@ $(function() {
     function popModal(name, model) {
         if($('#cropper-modal').length) {
             // set modal variables (name)
-            $('#cropper-modal').attr('data-name', name);
+            $('#cropper-modal').data('name', name);
 
             // show modal
             $('#cropper-modal').modal('show');
+
+            // Laad de functies
+            loadModalFunctions();
 
         } else {
             initModal(name, model);
@@ -257,6 +329,31 @@ $(function() {
                 console.log(data);
                 alert('error bij aanmaken modal, zie console');
             },
+        });
+    }
+
+    function loadModalFunctions() {
+        $(document).on('click', '#cropper-modal .nav-item', function() {
+            $('#cropper-modal .nav-item.active').removeClass('active');
+            $(this).addClass('active');
+
+            var name = $('#cropper-modal').data('name');
+            var model = $('#cropper-modal').data('model');
+            var content = $(this).data('content');
+            var data = {'type': 'modalNav', 'name': name, 'model': model, 'content': content};
+            $.ajax({
+                type:'POST',
+                url:'/cropperxhrRequest',
+                data:data,
+                success: function(data) {
+                    // of in #cropper-modal-tab?
+                    $('#cropper-modal #cropper-modal-tab').html(data.html);
+                },
+                error: function(data) {
+                    console.log(data);
+                    alert('error bij navigeren modal, zie console');
+                },
+            });
         });
     }
 
