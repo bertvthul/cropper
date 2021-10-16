@@ -20,7 +20,6 @@
         }
     ],
     "require": {
-        "php" : "^7.0",
         "intervention/image": "^2.5"
     },
     "autoload": {
